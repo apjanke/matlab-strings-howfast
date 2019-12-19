@@ -16,11 +16,11 @@ classdef BenchStringsIdentity
   %
   % rslt1 = b.bench_ismember_one_last
   %
-  % rslt2 = b.sweep_haystack_for_test('ismember_one_last')
-  % plot(rslt2)
+  % rslt_ismember = b.sweep_haystack_for_test('ismember_one_last')
+  % plot(rslt_ismember)
   %
-  % rslt3 = b.sweep_haystack_for_test('eq_one_vs_many')
-  % plot(rslt3)
+  % rslt_eq = b.sweep_haystack_for_test('eq_one_vs_many')
+  % plot(rslt_eq)
   
   %#ok<*PROP>
   %#ok<*NASGU>
@@ -189,6 +189,50 @@ classdef BenchStringsIdentity
       t0 = tic;
       for i_iter = 1:n_iters
         trash = needle == haystack;
+      end
+      te_mcos = toc(t0);
+      
+      % Package output
+      stk = dbstack;
+      fcn_name = regexprep(stk(1).name, '.*\.', '');
+      test_name = regexprep(fcn_name, '^bench_', '');
+      out = ResultCharVsStrSingle(test_name, ...
+        te_char/n_iters, te_string/n_iters, te_mcos/n_iters);
+    end
+    
+    function out = bench_strcmp_one_vs_many(this)
+      % Test strcmp(a, b) for scalar a vs large b
+      %
+      % where the needle is at the beginning of the haystack
+      
+      % Generate inputs
+      this = prep_inputs(this);
+      base_needle = this.haystack(1);
+      base_haystack = this.haystack;
+      n_iters = this.n_iters;
+      
+      % Run tests
+      needle = base_needle;
+      haystack = base_haystack;
+      t0 = tic;
+      for i_iter = 1:n_iters
+        trash = strcmp(needle, haystack);
+      end
+      te_char = toc(t0);
+      
+      needle = string(base_needle);
+      haystack = string(base_haystack);
+      t0 = tic;
+      for i_iter = 1:n_iters
+        trash = strcmp(needle, haystack);
+      end
+      te_string = toc(t0);
+      
+      needle = DumbMcosString(base_needle);
+      haystack = DumbMcosString(base_haystack);
+      t0 = tic;
+      for i_iter = 1:n_iters
+        trash = strcmp(needle, haystack);
       end
       te_mcos = toc(t0);
       
